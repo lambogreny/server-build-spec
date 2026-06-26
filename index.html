@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Build · สรุปสเปค 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/@mui/material@5.16.7/umd/material-ui.production.min.js"></script>
+<style>
+  html,body{margin:0;}
+  *{font-family:'IBM Plex Sans Thai','Noto Sans Thai',sans-serif;}
+  .ms{font-family:'Material Symbols Rounded' !important;font-weight:normal;font-style:normal;line-height:1;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const e = React.createElement;
+const { useState, useMemo } = React;
+const M = MaterialUI;
+const { ThemeProvider, createTheme, CssBaseline, AppBar, Toolbar, Container, Box, Stack, Paper,
+  Card, CardContent, Typography, Chip, Avatar, Divider, List, ListItem, ListItemAvatar, ListItemText,
+  Table, TableHead, TableBody, TableRow, TableCell, TableContainer, LinearProgress, IconButton, Tooltip } = M;
+
+const Sym = (name, size=24) => e('span',{className:'ms', style:{fontSize:size}}, name);
+
+const storeColor = { 'Advice':'error', 'Shopee':'warning', 'มีอยู่แล้ว':'success' };
+const parts = [
+  { icon:'memory',          cat:'หน่วยประมวลผล',  name:'Intel Core Ultra 7 270K Plus', spec:'24C / 24T · 5.5 GHz · LGA1851', store:'Advice', us:13090, comp:12990 },
+  { icon:'developer_board', cat:'เมนบอร์ด',       name:'ASRock Z890 Pro RS DDR5', spec:'ATX · LGA1851', store:'Advice', us:6240, comp:7770 },
+  { icon:'memory_alt',      cat:'หน่วยความจำ',     name:'Corsair Vengeance RGB DDR5 192GB', spec:'48GB × 4 · 5200 MHz', store:'มีอยู่แล้ว', us:null, comp:null },
+  { icon:'videogame_asset', cat:'การ์ดจอ',        name:'NVIDIA GeForce RTX 3070', spec:'8GB GDDR6', store:'มีอยู่แล้ว', us:null, comp:null },
+  { icon:'storage',         cat:'พื้นที่จัดเก็บ', name:'WD Black SN7100 1TB', spec:'M.2 NVMe · PCIe 4.0', store:'Shopee', us:4703, comp:6490 },
+  { icon:'bolt',            cat:'พาวเวอร์ซัพพลาย', name:'Corsair RM850e 850W', spec:'80+ Gold · Full Modular', store:'Advice', us:3500, comp:3690 },
+  { icon:'ac_unit',         cat:'ระบายความร้อน',   name:'Thermaltake Astria 600', spec:'ฮีตซิงก์ลม Dual-Tower', store:'Advice', us:2100, comp:2100 },
+  { icon:'dns',             cat:'เคส',             name:'ASUS A31 Plus TG ARGB', spec:'ATX · ARGB 4 พัดลม', store:'Shopee', us:2071, comp:2590 },
+];
+const fmt = n => '฿'+Number(n).toLocaleString();
+const usTotal = parts.reduce((s,p)=>s+(p.us||0),0);
+const compTotal = parts.reduce((s,p)=>s+(p.comp||0),0);
+const saved = compTotal - usTotal;
+const savedPct = Math.round(saved/compTotal*100);
+
+function PartRow(p, last){
+  return e(React.Fragment,null,
+    e(ListItem,{alignItems:'center', sx:{px:2.5, py:1.75}, secondaryAction:
+      e(Stack,{spacing:0.75, alignItems:'flex-end'},
+        p.us!=null
+          ? e(Typography,{variant:'subtitle1', fontWeight:700}, fmt(p.us))
+          : e(Typography,{variant:'body2', color:'success.main', fontWeight:600}, 'มีอยู่แล้ว'),
+        e(Chip,{label:p.store, color:storeColor[p.store], size:'small', variant: p.us!=null?'filled':'outlined', sx:{height:22, fontSize:12, fontWeight:600}})
+      )
+    },
+      e(ListItemAvatar,null, e(Avatar,{variant:'rounded', sx:{width:44, height:44}}, Sym(p.icon,24))),
+      e(ListItemText,{
+        primaryTypographyProps:{fontWeight:600, pr:9},
+        secondaryTypographyProps:{variant:'body2', component:'div'},
+        primary:p.name,
+        secondary:e(Box,{component:'span', sx:{display:'block'}},
+          e(Typography,{component:'span', variant:'caption', color:'primary.main', sx:{textTransform:'uppercase', letterSpacing:1, fontWeight:700}}, p.cat),
+          e('span',{style:{opacity:0.85}}, '  ·  '+p.spec)
+        )
+      })
+    ),
+    last ? null : e(Divider,{component:'li', variant:'inset', sx:{ml:'72px'}})
+  );
+}
+
+function CompareTable(){
+  return e(TableContainer,null,
+    e(Table,{size:'small'},
+      e(TableHead,null,
+        e(TableRow,null,
+          e(TableCell,null, 'รายการ'),
+          e(TableCell,{align:'right'}, 'เรา'),
+          e(TableCell,{align:'right'}, 'iHAVECPU'),
+          e(TableCell,{align:'right'}, 'ส่วนต่าง')
+        )
+      ),
+      e(TableBody,null,
+        ...parts.filter(p=>p.us!=null).map((p,i)=>{
+          const d=p.comp-p.us;
+          return e(TableRow,{key:i, hover:true},
+            e(TableCell,null, p.name.split(' ').slice(0,3).join(' ')),
+            e(TableCell,{align:'right', sx:{fontWeight:600}}, fmt(p.us)),
+            e(TableCell,{align:'right', sx:{color:'text.secondary'}}, fmt(p.comp)),
+            e(TableCell,{align:'right', sx:{fontWeight:700, color: d>=0?'success.main':'error.main'}}, (d>=0?'+':'−')+fmt(Math.abs(d)))
+          );
+        }),
+        e(TableRow,null,
+          e(TableCell,{sx:{borderBottom:0, fontWeight:700}}, 'รวม'),
+          e(TableCell,{align:'right', sx:{borderBottom:0, fontWeight:700, color:'success.main'}}, fmt(usTotal)),
+          e(TableCell,{align:'right', sx:{borderBottom:0, color:'text.secondary'}}, fmt(compTotal)),
+          e(TableCell,{align:'right', sx:{borderBottom:0, fontWeight:700, color:'primary.main'}}, '+'+fmt(saved))
+        )
+      )
+    )
+  );
+}
+
+function App(){
+  const [mode, setMode] = useState('dark');
+  const theme = useMemo(()=>createTheme({
+    palette:{ mode },
+    typography:{ fontFamily:'IBM Plex Sans Thai, Noto Sans Thai, sans-serif' },
+    shape:{ borderRadius:12 }
+  }), [mode]);
+
+  return e(ThemeProvider,{theme},
+    e(CssBaseline),
+    e(Box,{sx:{minHeight:'100vh', bgcolor:'background.default'}},
+      e(AppBar,{position:'sticky', color:'default', elevation:0, sx:{borderBottom:1, borderColor:'divider', bgcolor:'background.paper'}},
+        e(Toolbar,null,
+          e(Avatar,{variant:'rounded', sx:{bgcolor:'primary.main', color:'primary.contrastText', mr:1.5, width:36, height:36}}, Sym('dns',20)),
+          e(Box,{sx:{flexGrow:1}},
+            e(Typography,{variant:'subtitle1', fontWeight:700, lineHeight:1.1}, 'Server Build'),
+            e(Typography,{variant:'caption', color:'text.secondary'}, 'สรุปสเปค · มิ.ย. 2026')
+          ),
+          e(Chip,{size:'small', color:'success', variant:'outlined', label:'ประหยัด '+savedPct+'%', sx:{mr:1, fontWeight:600}}),
+          e(Tooltip,{title: mode==='dark'?'โหมดสว่าง':'โหมดมืด'},
+            e(IconButton,{onClick:()=>setMode(mode==='dark'?'light':'dark'), color:'inherit'},
+              Sym(mode==='dark'?'light_mode':'dark_mode',22))
+          )
+        )
+      ),
+      e(Container,{maxWidth:'sm', sx:{py:3}},
+        e(Stack,{spacing:2.5},
+          e(Card,{variant:'outlined'},
+            e(CardContent,null,
+              e(Typography,{variant:'overline', color:'text.secondary'}, 'มูลค่าที่ประหยัดได้'),
+              e(Stack,{direction:'row', alignItems:'baseline', spacing:1, flexWrap:'wrap'},
+                e(Typography,{variant:'h4', fontWeight:700, color:'success.main'}, '~'+fmt(saved)),
+                e(Typography,{variant:'body2', color:'text.secondary'}, 'เทียบ iHAVECPU (สเปคเดียวกัน)')
+              ),
+              e(LinearProgress,{variant:'determinate', value:savedPct, color:'success', sx:{mt:1.5, height:8, borderRadius:5}}),
+              e(Typography,{variant:'caption', color:'text.secondary', sx:{mt:1, display:'block'}},
+                'รวม '+fmt(usTotal)+' จากปกติ '+fmt(compTotal)+'  ·  + โค้ด Advice ลดอีก ฿996')
+            )
+          ),
+          e(Card,{variant:'outlined', sx:{overflow:'hidden'}},
+            e(Box,{sx:{px:2.5, pt:2}},
+              e(Typography,{variant:'subtitle1', fontWeight:700}, 'รายการอุปกรณ์'),
+              e(Typography,{variant:'caption', color:'text.secondary'}, '8 รายการ · ครบพร้อมประกอบ')
+            ),
+            e(List,{disablePadding:true, sx:{mt:1}},
+              ...parts.map((p,i)=>e(React.Fragment,{key:i}, PartRow(p, i===parts.length-1)))
+            )
+          ),
+          e(Card,{variant:'outlined', sx:{overflow:'hidden'}},
+            e(Box,{sx:{px:2.5, pt:2, pb:0.5}},
+              e(Typography,{variant:'subtitle1', fontWeight:700}, 'เปรียบเทียบราคา'),
+              e(Typography,{variant:'caption', color:'text.secondary'}, 'เรา vs iHAVECPU — เฉพาะรายการที่ซื้อใหม่')
+            ),
+            CompareTable()
+          ),
+          e(Typography,{variant:'caption', color:'text.secondary', align:'center', sx:{pb:2}},
+            'จัดซื้อโดยเลขาช่วยซื้อของ · myshoping')
+        )
+      )
+    )
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+window.__rendered = true;
+</script>
+</body>
+</html>
