@@ -23,36 +23,67 @@ const e = React.createElement;
 const { useState, useMemo } = React;
 const M = MaterialUI;
 const { ThemeProvider, createTheme, CssBaseline, AppBar, Toolbar, Container, Box, Stack, Paper,
-  Card, CardContent, Typography, Chip, Avatar, Divider, List, ListItem, ListItemAvatar, ListItemText,
-  Table, TableHead, TableBody, TableRow, TableCell, TableContainer, LinearProgress, IconButton, Tooltip } = M;
+  Card, CardHeader, CardContent, Typography, Chip, Avatar, Divider, List, ListItem, ListItemAvatar,
+  ListItemText, Table, TableHead, TableBody, TableRow, TableCell, TableContainer, LinearProgress,
+  IconButton, Tooltip, Tabs, Tab, Badge, Grow, Fade, ToggleButton, ToggleButtonGroup } = M;
 
 const Sym = (name, size=24) => e('span',{className:'ms', style:{fontSize:size}}, name);
-
 const storeColor = { 'Advice':'error', 'Shopee':'warning', 'มีอยู่แล้ว':'success' };
 const parts = [
-  { icon:'memory',          cat:'หน่วยประมวลผล',  name:'Intel Core Ultra 7 270K Plus', spec:'24C / 24T · 5.5 GHz · LGA1851', store:'Advice', us:13090, comp:12990 },
-  { icon:'developer_board', cat:'เมนบอร์ด',       name:'ASRock Z890 Pro RS DDR5', spec:'ATX · LGA1851', store:'Advice', us:6240, comp:7770 },
-  { icon:'memory_alt',      cat:'หน่วยความจำ',     name:'Corsair Vengeance RGB DDR5 192GB', spec:'48GB × 4 · 5200 MHz', store:'มีอยู่แล้ว', us:null, comp:null },
-  { icon:'videogame_asset', cat:'การ์ดจอ',        name:'NVIDIA GeForce RTX 3070', spec:'8GB GDDR6', store:'มีอยู่แล้ว', us:null, comp:null },
-  { icon:'storage',         cat:'พื้นที่จัดเก็บ', name:'WD Black SN7100 1TB', spec:'M.2 NVMe · PCIe 4.0', store:'Shopee', us:4703, comp:6490 },
-  { icon:'bolt',            cat:'พาวเวอร์ซัพพลาย', name:'Corsair RM850e 850W', spec:'80+ Gold · Full Modular', store:'Advice', us:3500, comp:3690 },
-  { icon:'ac_unit',         cat:'ระบายความร้อน',   name:'Thermaltake Astria 600', spec:'ฮีตซิงก์ลม Dual-Tower', store:'Advice', us:2100, comp:2100 },
-  { icon:'dns',             cat:'เคส',             name:'ASUS A31 Plus TG ARGB', spec:'ATX · ARGB 4 พัดลม', store:'Shopee', us:2071, comp:2590 },
+  { icon:'memory',          cat:'CPU',       name:'Intel Core Ultra 7 270K Plus', spec:'24C / 24T · 5.5 GHz · LGA1851', store:'Advice', us:13090, comp:12990 },
+  { icon:'developer_board', cat:'MAINBOARD', name:'ASRock Z890 Pro RS DDR5', spec:'ATX · LGA1851', store:'Advice', us:6240, comp:7770 },
+  { icon:'memory_alt',      cat:'RAM',       name:'Corsair Vengeance RGB DDR5 192GB', spec:'48GB × 4 · 5200 MHz', store:'มีอยู่แล้ว', us:null, comp:null },
+  { icon:'videogame_asset', cat:'GPU',       name:'NVIDIA GeForce RTX 3070', spec:'8GB GDDR6', store:'มีอยู่แล้ว', us:null, comp:null },
+  { icon:'storage',         cat:'STORAGE',   name:'WD Black SN7100 1TB', spec:'M.2 NVMe · PCIe 4.0', store:'Shopee', us:4703, comp:6490 },
+  { icon:'bolt',            cat:'PSU',       name:'Corsair RM850e 850W', spec:'80+ Gold · Full Modular', store:'Advice', us:3500, comp:3690 },
+  { icon:'ac_unit',         cat:'COOLER',    name:'Thermaltake Astria 600', spec:'Air · Dual-Tower', store:'Advice', us:2100, comp:2100 },
+  { icon:'dns',             cat:'CASE',      name:'ASUS A31 Plus TG ARGB', spec:'ATX · 4× ARGB Fans', store:'Shopee', us:2071, comp:2590 },
 ];
 const fmt = n => '฿'+Number(n).toLocaleString();
 const usTotal = parts.reduce((s,p)=>s+(p.us||0),0);
 const compTotal = parts.reduce((s,p)=>s+(p.comp||0),0);
 const saved = compTotal - usTotal;
 const savedPct = Math.round(saved/compTotal*100);
+const newItems = parts.filter(p=>p.us!=null).length;
+
+function HeroCard(){
+  return e(Grow,{in:true, timeout:600},
+    e(Card,{variant:'outlined'},
+      e(CardContent,null,
+        e(Stack,{direction:'row', justifyContent:'space-between', alignItems:'flex-start'},
+          e(Box,null,
+            e(Typography,{variant:'overline', color:'text.secondary'}, 'ประหยัดเทียบ iHAVECPU'),
+            e(Typography,{variant:'h4', fontWeight:700, color:'success.main', lineHeight:1.1}, '~'+fmt(saved)),
+          ),
+          e(Chip,{color:'success', label:'−'+savedPct+'%', icon:e('span',{className:'ms',style:{fontSize:18,marginLeft:6}},'trending_down'), sx:{fontWeight:700}})
+        ),
+        e(Tooltip,{title:'ราคาเรา '+fmt(usTotal)+' จากราคาปกติ '+fmt(compTotal), arrow:true, placement:'top'},
+          e(LinearProgress,{variant:'determinate', value:savedPct, color:'success', sx:{mt:2, height:10, borderRadius:5}})
+        ),
+        e(Stack,{direction:'row', justifyContent:'space-between', sx:{mt:1}},
+          e(Typography,{variant:'caption', color:'text.secondary'}, 'เรา '+fmt(usTotal)),
+          e(Typography,{variant:'caption', color:'text.secondary'}, 'ปกติ '+fmt(compTotal))
+        ),
+        e(Divider,{sx:{my:1.5}}),
+        e(Stack,{direction:'row', spacing:1, flexWrap:'wrap', useFlexGap:true},
+          e(Chip,{size:'small', variant:'outlined', icon:e('span',{className:'ms',style:{fontSize:16,marginLeft:6}},'sell'), label:'โค้ด Advice −฿996'}),
+          e(Chip,{size:'small', variant:'outlined', icon:e('span',{className:'ms',style:{fontSize:16,marginLeft:6}},'inventory_2'), label:'ครบ 8 รายการ'}),
+          e(Chip,{size:'small', variant:'outlined', color:'primary', icon:e('span',{className:'ms',style:{fontSize:16,marginLeft:6}},'dns'), label:'Server 24/7'})
+        )
+      )
+    )
+  );
+}
 
 function PartRow(p, last){
   return e(React.Fragment,null,
-    e(ListItem,{alignItems:'center', sx:{px:2.5, py:1.75}, secondaryAction:
+    e(ListItem,{sx:{px:2.5, py:1.75}, secondaryAction:
       e(Stack,{spacing:0.75, alignItems:'flex-end'},
         p.us!=null
           ? e(Typography,{variant:'subtitle1', fontWeight:700}, fmt(p.us))
           : e(Typography,{variant:'body2', color:'success.main', fontWeight:600}, 'มีอยู่แล้ว'),
-        e(Chip,{label:p.store, color:storeColor[p.store], size:'small', variant: p.us!=null?'filled':'outlined', sx:{height:22, fontSize:12, fontWeight:600}})
+        e(Tooltip,{title:'ซื้อจาก '+p.store, arrow:true},
+          e(Chip,{label:p.store, color:storeColor[p.store], size:'small', variant: p.us!=null?'filled':'outlined', sx:{height:22, fontSize:12, fontWeight:600}}))
       )
     },
       e(ListItemAvatar,null, e(Avatar,{variant:'rounded', sx:{width:44, height:44}}, Sym(p.icon,24))),
@@ -72,20 +103,22 @@ function PartRow(p, last){
 
 function CompareTable(){
   return e(TableContainer,null,
-    e(Table,{size:'small'},
+    e(Table,{size:'small', stickyHeader:true},
       e(TableHead,null,
         e(TableRow,null,
-          e(TableCell,null, 'รายการ'),
-          e(TableCell,{align:'right'}, 'เรา'),
-          e(TableCell,{align:'right'}, 'iHAVECPU'),
-          e(TableCell,{align:'right'}, 'ส่วนต่าง')
+          e(TableCell,null,'รายการ'),
+          e(TableCell,{align:'right'},'เรา'),
+          e(TableCell,{align:'right'},'iHAVECPU'),
+          e(TableCell,{align:'right'},'ส่วนต่าง')
         )
       ),
       e(TableBody,null,
         ...parts.filter(p=>p.us!=null).map((p,i)=>{
           const d=p.comp-p.us;
           return e(TableRow,{key:i, hover:true},
-            e(TableCell,null, p.name.split(' ').slice(0,3).join(' ')),
+            e(TableCell,null, e(Stack,{direction:'row', spacing:1, alignItems:'center'},
+              e(Chip,{label:p.cat, size:'small', variant:'outlined', sx:{height:20, fontSize:11}}),
+              e('span', null, p.name.split(' ').slice(0,2).join(' ')))),
             e(TableCell,{align:'right', sx:{fontWeight:600}}, fmt(p.us)),
             e(TableCell,{align:'right', sx:{color:'text.secondary'}}, fmt(p.comp)),
             e(TableCell,{align:'right', sx:{fontWeight:700, color: d>=0?'success.main':'error.main'}}, (d>=0?'+':'−')+fmt(Math.abs(d)))
@@ -104,6 +137,7 @@ function CompareTable(){
 
 function App(){
   const [mode, setMode] = useState('dark');
+  const [tab, setTab] = useState(0);
   const theme = useMemo(()=>createTheme({
     palette:{ mode },
     typography:{ fontFamily:'IBM Plex Sans Thai, Noto Sans Thai, sans-serif' },
@@ -120,42 +154,27 @@ function App(){
             e(Typography,{variant:'subtitle1', fontWeight:700, lineHeight:1.1}, 'Server Build'),
             e(Typography,{variant:'caption', color:'text.secondary'}, 'สรุปสเปค · มิ.ย. 2026')
           ),
-          e(Chip,{size:'small', color:'success', variant:'outlined', label:'ประหยัด '+savedPct+'%', sx:{mr:1, fontWeight:600}}),
-          e(Tooltip,{title: mode==='dark'?'โหมดสว่าง':'โหมดมืด'},
-            e(IconButton,{onClick:()=>setMode(mode==='dark'?'light':'dark'), color:'inherit'},
-              Sym(mode==='dark'?'light_mode':'dark_mode',22))
+          e(ToggleButtonGroup,{size:'small', exclusive:true, value:mode, onChange:(ev,v)=>{ if(v) setMode(v); }},
+            e(ToggleButton,{value:'light'}, Sym('light_mode',18)),
+            e(ToggleButton,{value:'dark'}, Sym('dark_mode',18))
           )
         )
       ),
       e(Container,{maxWidth:'sm', sx:{py:3}},
         e(Stack,{spacing:2.5},
-          e(Card,{variant:'outlined'},
-            e(CardContent,null,
-              e(Typography,{variant:'overline', color:'text.secondary'}, 'มูลค่าที่ประหยัดได้'),
-              e(Stack,{direction:'row', alignItems:'baseline', spacing:1, flexWrap:'wrap'},
-                e(Typography,{variant:'h4', fontWeight:700, color:'success.main'}, '~'+fmt(saved)),
-                e(Typography,{variant:'body2', color:'text.secondary'}, 'เทียบ iHAVECPU (สเปคเดียวกัน)')
-              ),
-              e(LinearProgress,{variant:'determinate', value:savedPct, color:'success', sx:{mt:1.5, height:8, borderRadius:5}}),
-              e(Typography,{variant:'caption', color:'text.secondary', sx:{mt:1, display:'block'}},
-                'รวม '+fmt(usTotal)+' จากปกติ '+fmt(compTotal)+'  ·  + โค้ด Advice ลดอีก ฿996')
-            )
-          ),
-          e(Card,{variant:'outlined', sx:{overflow:'hidden'}},
-            e(Box,{sx:{px:2.5, pt:2}},
-              e(Typography,{variant:'subtitle1', fontWeight:700}, 'รายการอุปกรณ์'),
-              e(Typography,{variant:'caption', color:'text.secondary'}, '8 รายการ · ครบพร้อมประกอบ')
+          HeroCard(),
+          e(Paper,{variant:'outlined', sx:{overflow:'hidden'}},
+            e(Tabs,{value:tab, onChange:(ev,v)=>setTab(v), variant:'fullWidth', sx:{borderBottom:1, borderColor:'divider'}},
+              e(Tab,{iconPosition:'start', icon:Sym('list_alt',20), label:e(Badge,{badgeContent:parts.length, color:'primary', sx:{'& .MuiBadge-badge':{right:-14, top:2}}}, 'อุปกรณ์')}),
+              e(Tab,{iconPosition:'start', icon:Sym('balance',20), label:'เปรียบเทียบ'})
             ),
-            e(List,{disablePadding:true, sx:{mt:1}},
-              ...parts.map((p,i)=>e(React.Fragment,{key:i}, PartRow(p, i===parts.length-1)))
+            e(Fade,{in:true, timeout:400, key:tab},
+              e(Box,null,
+                tab===0
+                  ? e(List,{disablePadding:true}, ...parts.map((p,i)=>e(React.Fragment,{key:i}, PartRow(p, i===parts.length-1))))
+                  : CompareTable()
+              )
             )
-          ),
-          e(Card,{variant:'outlined', sx:{overflow:'hidden'}},
-            e(Box,{sx:{px:2.5, pt:2, pb:0.5}},
-              e(Typography,{variant:'subtitle1', fontWeight:700}, 'เปรียบเทียบราคา'),
-              e(Typography,{variant:'caption', color:'text.secondary'}, 'เรา vs iHAVECPU — เฉพาะรายการที่ซื้อใหม่')
-            ),
-            CompareTable()
           ),
           e(Typography,{variant:'caption', color:'text.secondary', align:'center', sx:{pb:2}},
             'จัดซื้อโดยเลขาช่วยซื้อของ · myshoping')
